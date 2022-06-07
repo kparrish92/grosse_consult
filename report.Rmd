@@ -13,7 +13,7 @@ library(tidyverse)
 
 ## Statistical Analysis
 
-The data were analyzed using a multinational logistic regression using the categorical family and logit linking function in the R package `brms`. The model priors followed the default in `brms`, using the Student's T distribution with 3 degrees of freedom. A single model was fit to the data where the outcome variable was the probability of realizing the a stop as a fricative, stop or tap (3 levels). The outcome was predicted by the population (fixed) effects of group (3 levels: labeled "1", "2" and "3" in the data), and session (3 levels: labeled "1", "5" and "6"). The random effects included a random slope by participant for session and a random intercept for token. The model was run using with 2000 iterations of Hamiltonian Monte-Carlo sampling (1000 warm up), across 4 chains and 8 processing cores.
+The data were analyzed using a multinational logistic regression using the categorical family and logit linking function in the R package `brms`. The model priors followed the default in `brms`, using the Student's T distribution with 3 degrees of freedom. A single model was fit to the data where the outcome variable was the probability of realizing the a stop as a fricative, stop or tap (3 levels). The outcome was predicted by the population (fixed) effects of group (3 levels: labeled "control", "experimental", and "comparison" in the data), and session (3 levels: labeled "1", "5" and "6"). The random effects included a random slope by participant for session and a random intercept for token. The model was run using with 2000 iterations of Hamiltonian Monte-Carlo sampling (1000 warm up), across 4 chains and 8 processing cores.
 
 ## Results
 
@@ -55,9 +55,9 @@ read.csv(here("report", "param.csv")) %>%
 The random slopes by participant were from the model are plotted here. 
 Each point represents the probability of realizing the given token as a fricative at each timepoint. 
 Figure 4 shows the probability of a fricative realization at session 1.
-There were a few participants with a high baseline in groups 2 and 3 as can be seen from the figure.
+There were a few participants with a high baseline in the experimental and comparison groups as can be seen from the figure.
 Figure 5 shows the probability of a fricative realization at session 5.
-Groups 2 and 3 largely showed evidence of increases from time 2-3.
+The experimental and control groups largely showed evidence of increases from time 2-3.
 Figure 6 shows the same information for session 6, were many participants were slightly less likely to realize the tokens as fricatives. 
 
 **Figure 4: Probability of a fricative realization at session 1**
