@@ -1,0 +1,82 @@
+---
+title: "Grosse Consult"
+format: html
+editor: visual
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include=FALSE}
+library(here)
+library(tidyverse)
+```
+
+## Statistical Analysis
+
+The data were analyzed using a multinational logistic regression using the categorical family and logit linking function in the R package `brms`. The model priors followed the default in `brms`, using the Student's T distribution with 3 degrees of freedom. A single model was fit to the data where the outcome variable was the probability of realizing the a stop as a fricative, stop or tap (3 levels). The outcome was predicted by the population (fixed) effects of group (3 levels: labeled "1", "2" and "3" in the data), and session (3 levels: labeled "1", "5" and "6"). The random effects included a random slope by participant for session and a random intercept for token. The model was run using with 2000 iterations of Hamiltonian Monte-Carlo sampling (1000 warm up), across 4 chains and 8 processing cores.
+
+## Results
+
+Figure 1 shows the amount of each type of realization of the intervocalic /d/ by each group (vertical axis) at each session (horizontal axis). It appears that, for group 1, the proportion of fricatives only slightly increased from session 1 to session 5, but decreased again in session 6. In groups 2 and 3, the total fricative realizations increased with the same trend: the most fricative realizations were during session 5, and there were fewer at time 6.
+
+**Figure 1**
+
+```{r}
+knitr::include_graphics(here("report", "figs", "desc_fig.png"))
+```
+
+Figure 2 is a summary and visualization of the multinational model. The y-axis contains the names of each parameter estimate of the model and includes all fixed effects and interactions no used as the reference level. The reference level for the outcome variable was taps, where the reference for session and group were both "1". The density plots represent the posterior distribution of 95% all plausible values of the effect of the given parameter in log odds relative to the reference level. The numerical values represent the 95% Highest Density Interval (HDI), where the first number is the median value of the posterior and the numbers in brackets represent the upper and lower bounds of probable estimates.
+
+**Figure 2**
+
+```{r}
+knitr::include_graphics(here("report", "figs", "model_output.png"))
+```
+
+The output of the model was converted from log-odds to probability using the `plogis` function, and analysis was aided using the `conditional_effects` function in `brms`.
+Figure 3 shows the probability of that a given /d/ is realized as a fricative by each group during each session.
+Table 1 shows the same information in numerical form (upper and lower bounds of the 95% HDI is in brackets).
+As one can see, the same trends present in the descriptive data are reflected by the inferential statistics: group 1 did not show strong evidence of improving between sessions, group 2 improved the most, and group 3 also improved. 
+For both groups 2 and 3, their peak performace was at session 5. 
+
+**Figure 3**
+
+```{r}
+knitr::include_graphics(here("report", "figs", "full_model.png"))
+```
+
+**Table 1**
+```{r}
+read.csv(here("report", "param.csv")) %>% 
+  select(2:5) %>% 
+  knitr::kable(format = "pandoc")
+
+```
+
+
+## Individual Analyses 
+
+The random slopes by participant were from the model are plotted here. 
+Each point represents the probability of realizing the given token as a fricative at each timepoint. 
+Figure 4 shows the probability of a fricative realization at session 1.
+There were a few participants with a high baseline in groups 2 and 3 as can be seen from the figure.
+Figure 5 shows the probability of a fricative realization at session 5.
+Groups 2 and 3 largely showed evidence of increases from time 2-3.
+Figure 6 shows the same information for session 6, were many participants were slightly less likely to realize the tokens as fricatives. 
+
+**Figure 4: Probability of a fricative realization at session 1**
+```{r}
+knitr::include_graphics(here("report", "figs", "session1_ind.png"))
+```
+
+**Figure 5: Probability of a fricative realization at session 5**
+```{r}
+knitr::include_graphics(here("report", "figs", "session5_ind.png"))
+```
+
+**Figure 6: Probability of a fricative realization at session 6**
+```{r}
+knitr::include_graphics(here("report", "figs", "session6_ind.png"))
+```
+

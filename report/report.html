@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-0.9.367">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Grosse Consult</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+<script src="report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="report_files/libs/quarto-html/quarto.js"></script>
+<script src="report_files/libs/quarto-html/popper.min.js"></script>
+<script src="report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link id="quarto-text-highlighting-styles" href="report_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet">
+<script src="report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="report_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Grosse Consult</h1>
+</div>
+
+
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<section id="statistical-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-analysis">Statistical Analysis</h2>
+<p>The data were analyzed using a multinational logistic regression using the categorical family and logit linking function in the R package <code>brms</code>. The model priors followed the default in <code>brms</code>, using the Student’s T distribution with 3 degrees of freedom. A single model was fit to the data where the outcome variable was the probability of realizing the a stop as a fricative, stop or tap (3 levels). The outcome was predicted by the population (fixed) effects of group (3 levels: labeled “1”, “2” and “3” in the data), and session (3 levels: labeled “1”, “5” and “6”). The random effects included a random slope by participant for session and a random intercept for token. The model was run using with 2000 iterations of Hamiltonian Monte-Carlo sampling (1000 warm up), across 4 chains and 8 processing cores.</p>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<p>Figure 1 shows the amount of each type of realization of the intervocalic /d/ by each group (vertical axis) at each session (horizontal axis). It appears that, for group 1, the proportion of fricatives only slightly increased from session 1 to session 5, but decreased again in session 6. In groups 2 and 3, the total fricative realizations increased with the same trend: the most fricative realizations were during session 5, and there were fewer at time 6.</p>
+<p><strong>Figure 1</strong></p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="/Users/kyleparrish/Documents/GitHub/grosse_consult/report/figs/desc_fig.png" class="img-fluid" width="1050"></p>
+</div>
+</div>
+<p>Figure 2 is a summary and visualization of the multinational model. The y-axis contains the names of each parameter estimate of the model and includes all fixed effects and interactions no used as the reference level. The reference level for the outcome variable was taps, where the reference for session and group were both “1”. The density plots represent the posterior distribution of 95% all plausible values of the effect of the given parameter in log odds relative to the reference level. The numerical values represent the 95% Highest Density Interval (HDI), where the first number is the median value of the posterior and the numbers in brackets represent the upper and lower bounds of probable estimates.</p>
+<p><strong>Figure 2</strong></p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="/Users/kyleparrish/Documents/GitHub/grosse_consult/report/figs/model_output.png" class="img-fluid" width="1016"></p>
+</div>
+</div>
+<p>The output of the model was converted from log-odds to probability using the <code>plogis</code> function, and analysis was aided using the <code>conditional_effects</code> function in <code>brms</code>.</p>
+<p><strong>Figure 3</strong></p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="/Users/kyleparrish/Documents/GitHub/grosse_consult/report/figs/full_model.png" class="img-fluid" width="1016"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<thead>
+<tr class="header">
+<th>group S</th>
+<th>ession.1 S</th>
+<th>ession.5 S</th>
+<th style="text-align: left;">ession.6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0.003 [0-0.048]</td>
+<td>0.049 [0.006-0.248]</td>
+<td style="text-align: left;">0.02 [0.002-0.094]</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>0.047 [0.005-0.235]</td>
+<td>0.374 [0.072-0.785]</td>
+<td style="text-align: left;">0.286 [0.115-0.523]</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>0.055 [0.007-0.226]</td>
+<td>0.275 [0.072-0.632]</td>
+<td style="text-align: left;">0.2 [0.082-0.383]</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
