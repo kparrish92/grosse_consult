@@ -116,7 +116,7 @@ df %>%
   theme(legend.position = "bottom")
 ### Model 
 
-df$group = as.factor(df$group)
+df$group_name = as.factor(df$group_name)
 
 df$session = as.factor(df$session)
 
@@ -190,15 +190,26 @@ mod_int <-
       file = here("data", "models", "modint.rds"))
 
 
+df = df %>% 
+  mutate(
+    group_name = case_when(
+      group == 1 ~ "Control",
+      group == 2 ~ "Experimental",
+      group == 3 ~ "Comparison"
+    )
+  )
+
+
+
 mod_int_re <- 
-  brm(formula = newest ~ session*group + 
-        (session | partic) + (1 | token), 
+  brm(formula = newest ~ session*group_name + 
+        (session | partic) + (session | token), 
       warmup = 1000, iter = 2000, chains = 4, 
       family = categorical(link = "logit"), 
       cores = parallel::detectCores(), 
       control = list(adapt_delta = 0.99, max_treedepth = 15), 
       data = df,
-      file = here("data", "models", "modint_re.rds"))
+      file = here("data", "models", "modint_re_updated.rds"))
 
 summary(mod_int_re)
 
@@ -301,25 +312,24 @@ df_binom$newest = as.factor(df_binom$newest)
 
 df_binom$session = as.factor(df_binom$session)
 
-df_binom$group = as.factor(df_binom$group)
-df_binom$newest = relevel(df_binom$newest, ref = "tap")
+df$newest = as.factor(df$newest)
+df$newest = relevel(df$newest, ref = "tap")
 
 
 
-mod_binomial <- 
+mod_binomial_2 <- 
   brm(formula = prob_fric ~ session*group + 
-        (session | partic) + (1 | token), 
+        (session | partic) + (session | token), 
       warmup = 1000, iter = 2000, chains = 4, 
       family = bernoulli(link = "logit"), 
       cores = parallel::detectCores(), 
       control = list(adapt_delta = 0.99, max_treedepth = 15), 
       data = df_binom,
-      file = here("data", "models", "mod_binom.rds"))
+      file = here("data", "models", "mod_binom_2.rds"))
 
 
-fixef(mod_binomial)
 
-ran = ranef(mod_binomial) 
+ran = ranef(mod_binomial_2) 
 
 ran_df = ran[["partic"]] %>% 
   as.data.frame()

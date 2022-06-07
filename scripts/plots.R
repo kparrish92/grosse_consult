@@ -1,16 +1,30 @@
+library(tidyverse)
+library(brms)
+library(here)
+library(tidybayes)
+library(bayesplot)
+library(LaplacesDemon)
 
 df = read.csv(here("data", "tidy_data.csv")) %>% 
   janitor::clean_names() %>% 
   filter(!is.na(duration))
 
+df = df %>% 
+  mutate(
+    group_name = case_when(
+      group == 1 ~ "Control",
+      group == 2 ~ "Experimental",
+      group == 3 ~ "Comparison"
+    )
+  )
 
 df %>% 
-  group_by(session, group, newest) %>% 
+  group_by(session, group_name, newest) %>% 
   summarize(n = n()) %>% 
   ggplot(aes(y = n, x = newest, fill = newest)) + geom_col(color = "black") + 
   scale_x_discrete(limits=c("tap", "stop", "fricative")) +
   theme(panel.background = element_rect(fill = "white")) +
-  facet_grid(group~session) +
+  facet_grid(group_name~session) +
   theme(text=
           element_text(
             size=10,
@@ -22,7 +36,8 @@ df %>%
   ggsave(here("report", "figs", "desc_fig.png"), dpi = 300)
 
 
-mod_int_re = readRDS(here("models", "modint_re.rds"))
+mod_int_re = readRDS(here("data", "models", "modint_re_updated.rds"))
+
 posterior <- as.data.frame(mod_int_re)
 
 pars = colnames(posterior[1:18])
@@ -39,14 +54,12 @@ mcmc_areas(posterior,
            prob = 0.8) + 
   xlim(-20,40) + 
   geom_text(data = mutate_if(fixef_df, is.numeric, round, 2),
-                                                  aes(label = paste(Estimate, "[",
-                                                                    Q2.5, "-", Q97.5,
-                                                                    "]"), x = Inf), 
+            aes(label = paste(Estimate, "[", Q2.5, "-", Q97.5, "]"), x = Inf), 
                                                   hjust = "inward", size = 3) + 
   ggsave(here("report", "figs", "model_output.png"), dpi = 300)
 
 
-conditions = make_conditions(mod_int_re, vars = "group")
+conditions = make_conditions(mod_int_re, vars = "group_name")
 x = conditional_effects(mod_int_re, categorical = TRUE, conditions = conditions)
 
 
@@ -63,7 +76,8 @@ eff_df$effect1__ <- factor(eff_df$effect1__,
 
 eff_df %>% 
   filter(effect2__ == "fricative") %>% 
-  ggplot(aes(y = estimate__, x = effect1__, fill = group, group = group)) + 
+  ggplot(aes(y = estimate__, x = effect1__, 
+             fill = group_name, group = group_name)) + 
   geom_line(position = position_dodge(width = .5)) +
   geom_pointrange(aes(ymin = lower__, ymax = upper__), shape = 21, 
                   position = position_dodge(width = .5)) +
@@ -78,21 +92,21 @@ eff_df %>%
 
 upper = eff_df %>% 
   filter(effect2__ == "fricative") %>% 
-  select(group, effect1__, effect2__, upper__) %>% 
+  select(group_name, effect1__, effect2__, upper__) %>% 
   pivot_wider(names_from = effect1__, values_from = upper__) %>% 
-  select(group, `1`, `5`, `6`)
+  select(group_name, `1`, `5`, `6`)
 
 lower = eff_df %>% 
   filter(effect2__ == "fricative") %>% 
-  select(group, effect1__, effect2__, lower__) %>% 
+  select(group_name, effect1__, effect2__, lower__) %>% 
   pivot_wider(names_from = effect1__, values_from = lower__) %>% 
-  select(group, `1`, `5`, `6`)
+  select(group_name, `1`, `5`, `6`)
 
 params = eff_df %>% 
   filter(effect2__ == "fricative") %>% 
-  select(group, effect1__, effect2__, estimate__) %>% 
+  select(group_name, effect1__, effect2__, estimate__) %>% 
   pivot_wider(names_from = effect1__, values_from = estimate__) %>% 
-  select(group, `1`, `5`, `6`) 
+  select(group_name, `1`, `5`, `6`) 
 
 params$hi_1 = upper$`1`
 params$hi_5 = upper$`5`
@@ -112,13 +126,11 @@ param_table = params %>%
          `Session 6` = paste0(round(`6`, digits = 3), 
                               " [", round(params$lo_6, digits = 3),"-", 
                               round(params$hi_6, digits = 3), "]"))  %>% 
-  select(group, `Session 1`, `Session 5`, `Session 6`) %>% 
+  select(group_name, `Session 1`, `Session 5`, `Session 6`) %>% 
   write.csv(here("report", "param.csv"))
 
 
 
-
-level_order = c(group_3, group_2, group_1)
 
 fricative_fixef = eff_df %>% 
   filter(effect2__ == "fricative") %>% 
@@ -138,6 +150,10 @@ group_3_df = df %>% filter(group == "3")
 group_3 = unique(group_3_df$partic)
 
 
+
+
+level_order = c(group_3, group_2, group_1)
+
 ### Mutate group info to ranef df 
 
 ranef_df = ranef(mod_int_re) 
@@ -145,27 +161,32 @@ ranef_df = ranef(mod_int_re)
 ranef_part = ranef_df[["partic"]] %>% 
   as.data.frame()
 
+ranef_token = ranef_df[["token"]] %>% 
+  as.data.frame() %>% 
+  rownames_to_column("token")
+
+
 ranef_tidy = ranef_part %>% 
   rownames_to_column("partic") %>% 
   select(1:13) %>% 
   mutate(group = case_when(partic =
-                             partic %in% group_1 ~ "1",
-                           partic %in% group_2 ~ "2",
-                           partic %in% group_3 ~ "3")) %>% 
+                             partic %in% group_1 ~ "Control",
+                           partic %in% group_2 ~ "Experimental",
+                           partic %in% group_3 ~ "Comparison")) %>% 
   mutate(session_1 = case_when(
-    group == "1" ~ fricative_fixef$log_estimate[1],
-    group == "2" ~ fricative_fixef$log_estimate[4],
-    group == "3" ~ fricative_fixef$log_estimate[7]
+    group == "Comparison" ~ fricative_fixef$log_estimate[1],
+    group == "Control" ~ fricative_fixef$log_estimate[4],
+    group == "Experimental" ~ fricative_fixef$log_estimate[7]
   )) %>% 
   mutate(session_5 = case_when(
-    group == "1" ~ fricative_fixef$log_estimate[2],
-    group == "2" ~ fricative_fixef$log_estimate[5],
-    group == "3" ~ fricative_fixef$log_estimate[8]
+    group == "Comparison" ~ fricative_fixef$log_estimate[2],
+    group == "Control" ~ fricative_fixef$log_estimate[5],
+    group == "Experimental" ~ fricative_fixef$log_estimate[8]
   )) %>% 
   mutate(session_6 = case_when(
-    group == "1" ~ fricative_fixef$log_estimate[3],
-    group == "2" ~ fricative_fixef$log_estimate[6],
-    group == "3" ~ fricative_fixef$log_estimate[9]
+    group == "Comparison" ~ fricative_fixef$log_estimate[3],
+    group == "Control" ~ fricative_fixef$log_estimate[6],
+    group == "Experimental" ~ fricative_fixef$log_estimate[9]
   )) %>% 
   mutate(re_session_1 = plogis(session_1 + Estimate.mufricative_Intercept),
          re_session_1_lo = plogis(session_1 + Q2.5.mufricative_Intercept),
@@ -268,9 +289,9 @@ ranef_tidy %>%
   select(partic, re_session_1, re_session_5, re_session_6) %>% 
   pivot_longer(cols = c(2:4), names_to = "session", values_to = "probability") %>%
   mutate(group = case_when(partic =
-                             partic %in% group_1 ~ "1",
-                           partic %in% group_2 ~ "2",
-                           partic %in% group_3 ~ "3")) %>% 
+                             partic %in% group_1 ~ "Control",
+                           partic %in% group_2 ~ "Experimental",
+                           partic %in% group_3 ~ "Comparison"))%>% 
   ggplot(aes(y = probability, x = session, color = partic, group = partic)) + 
   geom_point() + geom_line() + facet_wrap(~group)
 
@@ -280,9 +301,9 @@ ranef_tidy %>%
   select(partic, re_session_1, re_session_5, re_session_6) %>% 
   pivot_longer(cols = c(2:4), names_to = "session", values_to = "probability") %>%
   mutate(group = case_when(partic =
-                             partic %in% group_1 ~ "1",
-                           partic %in% group_2 ~ "2",
-                           partic %in% group_3 ~ "3")) %>% 
+                             partic %in% group_1 ~ "Control",
+                           partic %in% group_2 ~ "Experimental",
+                           partic %in% group_3 ~ "Comparison")) %>% 
   ggplot(aes(y = probability, x = session, color = partic, group = partic)) + 
   geom_point() + geom_line() + facet_wrap(~group)
 
@@ -292,10 +313,14 @@ ranef_tidy %>%
   select(partic, change_1, change_2) %>% 
   pivot_longer(cols = c(2:3), names_to = "change_no", values_to = "value") %>%
   mutate(group = case_when(partic =
-                             partic %in% group_1 ~ "1",
-                           partic %in% group_2 ~ "2",
-                           partic %in% group_3 ~ "3")) %>% 
+                             partic %in% group_1 ~ "Control",
+                           partic %in% group_2 ~ "Experimental",
+                           partic %in% group_3 ~ "Comparison")) %>% 
   ggplot(aes(y = value, x = change_no, color = partic, group = partic)) + geom_point() + 
   geom_line() + geom_hline(yintercept = 0, linetype = "dashed") + facet_wrap(~group)
 
  
+
+  
+  
+re_test = ranef(mod_int_re)  
