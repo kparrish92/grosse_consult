@@ -5,18 +5,7 @@ library(tidybayes)
 library(bayesplot)
 library(LaplacesDemon)
 
-df = read.csv(here("data", "tidy_data.csv")) %>% 
-  janitor::clean_names() %>% 
-  filter(!is.na(duration))
-
-df = df %>% 
-  mutate(
-    group_name = case_when(
-      group == 1 ~ "Control",
-      group == 2 ~ "Experimental",
-      group == 3 ~ "Comparison"
-    )
-  )
+df = read.csv(here("data", "tidy_data_removal.csv")) 
 
 df %>% 
   group_by(session, group_name, newest) %>% 
@@ -35,8 +24,70 @@ df %>%
   xlab("Type of /d/ realization") + 
   ggsave(here("report", "figs", "desc_fig.png"), dpi = 300)
 
+y = df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) 
 
-mod_int_re = readRDS(here("data", "models", "modint_re_updated.rds"))
+sum(y$n)
+
+df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) %>% 
+  filter(newest == "fricative") %>% 
+  ggplot(aes(y = n, x = as.factor(token), fill = group_name)) + geom_col(color = "black") + 
+  theme(panel.background = element_rect(fill = "white")) +
+  facet_grid(~session)
+
+df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) %>% 
+  filter(session == "1") %>% 
+  ggplot(aes(y = n, x = as.factor(token), fill = group_name)) + geom_col(color = "black", position = "dodge",) + 
+  theme(panel.background = element_rect(fill = "white")) + facet_grid(~newest)
+
+
+df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) %>% 
+  filter(session == "5") %>% 
+  ggplot(aes(y = n, x = as.factor(token), fill = group_name)) + geom_col(color = "black", position = "dodge",) + 
+  theme(panel.background = element_rect(fill = "white")) + facet_grid(~newest)
+
+df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) %>% 
+  filter(session == "6") %>% 
+  ggplot(aes(y = n, x = as.factor(token), fill = group_name)) + geom_col(color = "black", position = "dodge",) + 
+  theme(panel.background = element_rect(fill = "white")) + facet_grid(~newest)
+
+
+
+df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) %>% 
+  filter(newest == "fricative") %>% 
+  filter(session == "1") %>% 
+  ggplot(aes(y = as.numeric(n), x = as.factor(token), fill = group_name)) + geom_col(color = "black", position = "dodge",) + 
+  theme(panel.background = element_rect(fill = "white")) + facet_grid(~group_name)
+
+df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) %>% 
+  filter(newest == "fricative") %>% 
+  filter(session == "5") %>% 
+  ggplot(aes(y = n, x = as.factor(token), fill = group_name)) + geom_col(color = "black", position = "dodge",) + 
+  theme(panel.background = element_rect(fill = "white")) + facet_grid(~group_name)
+
+df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) %>% 
+  filter(newest == "fricative") %>% 
+  filter(session == "6") %>% 
+  ggplot(aes(y = n, x = as.factor(token), fill = group_name)) + geom_col(color = "black", position = "dodge",) + 
+  theme(panel.background = element_rect(fill = "white")) + facet_grid(~group_name)
+
+
+mod_int_re = readRDS(here("data", "models", "mod_remov.rds"))
 
 posterior <- as.data.frame(mod_int_re)
 
@@ -69,9 +120,9 @@ eff_df = x[["session:cats__"]]
 
 eff_df$effect1__ <- factor(eff_df$effect1__, 
                            levels = 
-                             c("6", 
+                             c("1", 
                                "5", 
-                               "1"))
+                               "6"))
 
 
 eff_df %>% 
@@ -323,4 +374,97 @@ ranef_tidy %>%
 
   
   
-re_test = ranef(mod_int_re)  
+  df %>% 
+    group_by(token, newest, session, group_name) %>% 
+    summarize(n = n()) %>% 
+    ggplot(aes(y = n, x = as.factor(token), fill = newest)) + geom_col(color = "black") +
+    facet_wrap(group_name~session, ncol = 3) + 
+    theme(axis.text = element_text(size = 5)) 
+  
+  
+  
+  df %>% 
+    group_by(token, newest, session) %>% 
+    summarize(n = n()) %>% 
+    ggplot(aes(y = n, x = as.factor(token), fill = newest)) + geom_col(color = "black") +
+    facet_wrap(~session, ncol = 3) + 
+    theme(axis.text = element_text(size = 5)) +
+    scale_fill_discrete(name = "Realization type") +
+    theme(legend.position = "bottom") +
+    theme(panel.background = element_rect(fill = "white")) 
+  
+  
+  
+  df %>% 
+    group_by(token, newest, session) %>% 
+    summarize(n = n()) %>% 
+    filter(newest == "fricative") %>% 
+    ggplot(aes(y = n, x = as.factor(token), fill = newest)) + geom_col(color = "black",
+                                                                       fill = "seagreen") +
+    facet_wrap(~session, ncol = 3) + 
+    theme(axis.text = element_text(size = 5)) + xlab("Token") + 
+    theme(legend.position = "none") +
+    theme(panel.background = element_rect(fill = "white")) 
+  
+  
+  
+  
+  df_comp = df %>% 
+    group_by(token, newest, session, group_name) %>% 
+    summarize(n = n()) %>% 
+    filter(newest == "fricative")
+  
+  tokens_df = df %>% 
+    group_by(token, session, group_name) %>% 
+    summarize(n = n())
+  
+  df %>% 
+    group_by(session, group_name, newest) %>% 
+    summarize(n = n()) %>% 
+    ggplot(aes(y = n, x = newest, fill = newest)) + geom_col(color = "black") + 
+    scale_x_discrete(limits=c("tap", "stop", "fricative")) +
+    theme(panel.background = element_rect(fill = "white")) +
+    facet_grid(group_name~session) +
+    theme(text=
+            element_text(
+              size=10,
+              family="Times New Roman")) +
+    theme(legend.text=element_text(size=8)) +
+    theme(legend.position = "bottom") +
+    theme(legend.title = element_blank()) +
+    xlab("Type of /d/ realization")
+  
+  
+  ranef_token = ranef_df[["token"]] %>% 
+    as.data.frame() %>% 
+    rownames_to_column("token") %>% 
+    mutate("Session_1" = plogis(-2.7259739 + Estimate.mufricative_Intercept),
+           "Session_5" = plogis(Estimate.mufricative_Intercept + Estimate.mufricative_session5),
+           "Session_6" = plogis(Estimate.mufricative_Intercept + Estimate.mufricative_session6))
+  
+  mutate(Estimate.mufricative_Intercept, Estimate.mufricative_session5, Estimate.mufricative_session6)
+  
+  ranef_token$Session_1
+  
+  
+  ## Participant 11 
+  df %>% 
+    filter(partic == "11") %>% 
+    group_by(session, newest) %>% 
+    summarize(n = n()) %>% 
+    ggplot(aes(y = n, x = newest, fill = newest)) + geom_col(color = "black") + 
+    scale_x_discrete(limits=c("tap", "stop", "fricative")) +
+    theme(panel.background = element_rect(fill = "white")) +
+    facet_grid(~session) +
+    theme(text=
+            element_text(
+              size=10,
+              family="Times New Roman")) +
+    theme(legend.text=element_text(size=8)) +
+    theme(legend.position = "bottom") +
+    theme(legend.title = element_blank()) +
+    xlab("Type of /d/ realization")
+  
+  
+  
+  

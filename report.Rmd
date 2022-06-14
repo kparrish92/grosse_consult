@@ -3,12 +3,13 @@ title: "Grosse Consult"
 output: html_document
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warnings = FALSE)
 ```
 
 ```{r, include=FALSE}
 library(here)
 library(tidyverse)
+df = read.csv(here("data", "tidy_data_removal.csv")) 
 ```
 
 ## Statistical Analysis
@@ -73,4 +74,41 @@ knitr::include_graphics(here("report", "figs", "session5_ind.png"))
 **Figure 6: Probability of a fricative realization at session 6**
 ```{r}
 knitr::include_graphics(here("report", "figs", "session6_ind.png"))
+```
+
+
+## Items analysis
+
+Here's a by-item descriptive analysis of how many times (n) each token was produced by each group during each session.
+There were no cases where the control group produced the most fricative productions relative to the other groups. 
+
+
+```{r}
+df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) %>% 
+  filter(newest == "fricative") %>% 
+  filter(session == "1") %>% 
+  ggplot(aes(y = as.numeric(n), x = as.factor(token), fill = group_name)) + geom_col(color = "black", position = "dodge",) + 
+  theme(panel.background = element_rect(fill = "white")) + facet_grid(~group_name) + ggtitle("Number of fricative productions per token at Session 1") + xlab("token")
+```
+
+```{r}
+df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) %>% 
+  filter(newest == "fricative") %>% 
+  filter(session == "5") %>% 
+  ggplot(aes(y = n, x = as.factor(token), fill = group_name)) + geom_col(color = "black", position = "dodge",) + 
+  theme(panel.background = element_rect(fill = "white")) + facet_grid(~group_name) + ggtitle("Number of fricative productions per token at Session 5") + xlab("token")
+```
+
+```{r}
+df %>% 
+  group_by(session, group_name, newest, token) %>% 
+  summarize(n = n()) %>% 
+  filter(newest == "fricative") %>% 
+  filter(session == "6") %>% 
+  ggplot(aes(y = n, x = as.factor(token), fill = group_name)) + geom_col(color = "black", position = "dodge",) + 
+  theme(panel.background = element_rect(fill = "white")) + facet_grid(~group_name) + ggtitle("Number of fricative productions per token at Session 6") + xlab("token")
 ```
