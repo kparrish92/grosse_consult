@@ -1,0 +1,359 @@
+---
+title: "Updated data: Grosse"
+output: html_document
+date: '2022-07-16'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width=9.5)
+```
+
+```{r, include=FALSE}
+source(here::here("scripts_new", "00_libs.R"))
+source(here("scripts_new", "02_load_data.R"))
+```
+
+## Statistical Analysis
+
+The data were analyzed using a bayesian logistic regression using the bernoulli family and logit linking function in the R package `brms`. The model priors followed the default in `brms`, using the Student's T distribution with 3 degrees of freedom. A single model was fit to the data where the outcome variable was the probability of realizing the a stop as an approximant. The outcome was predicted by the population (fixed) effects of group (3 levels: labeled "control", "experimental", and "comparison" in the data), and session (3 levels: labeled "1", "5" and "6"). The random effects included a random slope by participant for session. The model was run using with 2000 iterations of Hamiltonian Monte-Carlo sampling (1000 warm up), across 4 chains and 8 processing cores.
+
+## Results
+
+Figure 1 shows a by group analysis of the raw data for the "control", "experimental", and "comparison" groups. 
+The color of the points represent the category of each stop realization, while the y-axis shows the duration of that realization. 
+The x-axis shows the spectral pattern of each stop (continuous (C), Stripe/Burst (S) or whitening (W)).
+
+```{r, fig.width=8, echo=FALSE, message=FALSE, results='hide'}
+session_all$spectral <- factor(session_all$spectral, 
+                               levels=c("Continuous", 
+                                        "Whitening", 
+                                        "Stripe/Burst"))
+
+session_all %>% 
+  filter(group == "Comparison" | group == "Experimental" | group == "Control") %>% 
+  ggplot(aes(x = spectral, y = duration, color = category)) + 
+  geom_point(alpha = .5) +
+  facet_grid(group~session) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Spectral Pattern") + ylab("Duration (ms)") +
+  scale_x_discrete(labels=c("Continuous" = "C", "Stripe/Burst" = "S",
+                            "Whitening" = "W")) +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) +
+  labs(caption = "Figure 1: Graph of duration and spectral data by group and session number. Spectral patterns were
+         labeled as continuous (C), whitened (W), or stripe/burst (S). Blue dots signify productions categorized
+         as “approximant”, yellow as “tap”, and red as “stop”.")
+```
+
+Figure 2 shows just the number of each type of realization per group per session.
+The figure shows that the number of approximant realizations are relatively low by all groups in session 1, while the quantity of approximant realizations was larger in both sessions 5 and 6 for the experimental groups, but not for the comparison and control groups. 
+
+
+```{r}
+session_all %>% 
+  filter(group == "Comparison" | group == "Experimental" | group == "Control") %>% 
+  group_by(session, group, category) %>% 
+  summarize(n = n()) %>% 
+  ggplot(aes(y = n, x = category, fill = category)) + geom_col(color = "black") + 
+  scale_x_discrete(limits=c("tap", "stop", "approximant")) +
+  theme(panel.background = element_rect(fill = "white")) +
+  facet_grid(group~session) +
+  theme(text=
+          element_text(
+            size=10,
+            family="Times New Roman")) +
+  theme(legend.text=element_text(size=8)) +
+  theme(legend.position = "bottom") +
+  theme(legend.title = element_blank()) +
+  xlab("Type of /d/ realization") +
+  labs(caption = "Figure 2: The number of realizations of each category by each group during each session")
+```
+
+Table 1 shows the output of the Bayesian logistic regression model.
+Overall, the model's conditional r squared value suggests that the model explained 37.6 of the variance observed in the data. 
+Figure 3 visualizes the model in a forest plot. 
+Each density plot is a summary of the most probable parameter estimates from the Bayesian model, and the values on the right side of the plot are the 95% highest density interval in log-odds. 
+
+**Table 1**
+```{r}
+fixef(mod) %>% 
+  as.data.frame() %>% 
+  knitr::kable(format = "pandoc")
+```
+
+```{r}
+posterior <- as.data.frame(mod)
+
+pars = colnames(posterior[1:9])
+
+fixef_df = fixef(mod) %>% 
+  as.data.frame() %>% 
+  rownames_to_column("parameter") %>% 
+  mutate(parameter = paste0("b_", parameter))
+
+bayesplot::mcmc_areas(posterior,
+           pars = pars,
+           prob = 0.8) + 
+  geom_text(data = mutate_if(fixef_df, is.numeric, round, 2),
+            aes(label = paste(Estimate, "[", Q2.5, "-", Q97.5, "]"), x = Inf), 
+            hjust = "inward", size = 2) + 
+  xlim(-10,15) +
+  theme(text = element_text(size=8)) +
+  labs(caption = "Figure 3: Forest Plot of the parameter estimates of the logistic regression model")
+
+```
+
+The output of logistic regressions models can be interpreted by adjusting the parameter estimates to a baseline group represented by the intercept of the model. 
+In this case, the intercept of the model tells us the log-odds of an approximant realization by the comparison group at session 1. 
+To figure out how the other groups perform, we simply add appropriate parameter estimates of the model to the intercept as it is appropriate. 
+For example, by adding session 5 (.65) to our intercept (-3.47), we get adjust for session while maintaining group (comparison). 
+As a result, our estimate is a log odds of -2.82 of producing a token as an approximant at session 5 for the comparison group. 
+
+```{r}
+mod_b_new = readRDS(here("data", "models", "mod_log_b.rds"))
+
+eff_df = conditional_effects(mod_b_new)[["session:group"]]
+
+eff_df$effect1__ <- factor(eff_df$effect1__, 
+                           levels = 
+                             c("1", 
+                               "5", 
+                               "6"))
+
+eff_df %>% 
+  filter(group == "Comparison" | group == "Experimental" | group == "Control") %>% 
+  ggplot(aes(y = estimate__, x = effect1__, 
+             fill = group, group = group)) + 
+  geom_line(position = position_dodge(width = .5)) +
+  geom_pointrange(aes(ymin = lower__, ymax = upper__), shape = 21, 
+                  position = position_dodge(width = .5)) +
+  theme(panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(
+          size = 0.1, 
+          linetype = 'solid',
+          colour = "grey")) +
+  ylab("Probability") + xlab("Test Time") +
+  labs(caption = "Figure 4: The probability of an approximant realization at each time point")
+```
+
+Rather than make arguments using log-odds, it's also possible to convert this metric to probability.
+I've done so using the `conditional_effects` function from the `brms` package in R. 
+The output of this function carries out the appropriate calculations and converts them to probability. 
+This information is visualized in Figure 4 and the numerical output can be seen in Table 2. 
+As can be seen in both, the experimental group saw an increase in the probability of approximant realization from both session 1 to session 5 and from session 5 to session 6. 
+This increase does not occur in the comparison or control groups.
+
+```{r}
+read.csv(here("report", "param_updated.csv")) %>% 
+  dplyr::select(2:5) %>% 
+  knitr::kable(format = "pandoc", caption = "Table 2: Probability of an approximant realization at each session")
+```
+
+### Individual analysis
+
+In addition to the group analysis, an individual analysis of the probability of approximant realization at each time point was carried out using the random slope by participant for session in the Bayesian Model. 
+First, Figure 5 shows duration, category and spectral information for each participant at each session for the control group.
+The same information can be seen for the comparison group in Figure 6 and the experimental group in Figure 7.
+
+```{r, echo=FALSE, message=FALSE, results='hide'}
+session_all %>% 
+  filter(group == "Control") %>% 
+  ggplot(aes(x = spectral, y = duration, color = category)) + 
+  geom_point(alpha = .5) +
+  facet_grid(partic~session) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Spectral Pattern") + ylab("Duration (ms)") +
+  scale_x_discrete(labels=c("Continuous" = "C", "Stripe/Burst" = "S",
+                            "Whitening" = "W")) +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) +
+  labs(caption = "Figure 5: Control group Individual Graphs of duration and spectral data by group and session number. Spectral patterns were
+         labeled as continuous (C), whitened (W), or stripe/burst (S). Blue dots signify productions categorized
+         as “approximant”, yellow as “tap”, and red as “stop”.")
+```
+
+
+```{r, echo=FALSE, message=FALSE, results='hide'}
+session_all %>% 
+  filter(group == "Comparison") %>% 
+  ggplot(aes(x = spectral, y = duration, color = category)) + 
+  geom_point(alpha = .5) +
+  facet_grid(partic~session) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Spectral Pattern") + ylab("Duration (ms)") +
+  scale_x_discrete(labels=c("Continuous" = "C", "Stripe/Burst" = "S",
+                            "Whitening" = "W")) +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) +
+  labs(caption = "Figure 6: Comparison group Individual Graphs of duration and spectral data by group and session number. Spectral patterns were
+         labeled as continuous (C), whitened (W), or stripe/burst (S). Blue dots signify productions categorized
+         as “approximant”, yellow as “tap”, and red as “stop”.")
+```
+
+
+```{r, echo=FALSE, message=FALSE, results='hide'}
+session_all %>% 
+  filter(group == "Experimental") %>% 
+  ggplot(aes(x = spectral, y = duration, color = category)) + 
+  geom_point(alpha = .5) +
+  facet_grid(partic~session) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Spectral Pattern") + ylab("Duration (ms)") +
+  scale_x_discrete(labels=c("Continuous" = "C", "Stripe/Burst" = "S",
+                            "Whitening" = "W")) +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) +
+  labs(caption = "Figure 7: Experimental group Individual Graphs of duration and spectral data by group and session number. Spectral patterns were
+         labeled as continuous (C), whitened (W), or stripe/burst (S). Blue dots signify productions categorized
+         as “approximant”, yellow as “tap”, and red as “stop”.")
+```
+
+Figure 8 utilizes the random slope for session by participant from the Bayesian model to determine the probability of an approximant realization at each session by the experimental group.
+The figure shows that an approximant realization was more probable at session 5 than session 1 and at session 6 than session 5 for all participants except for participant 1 and participant 31 and participant 48.
+Participant 48 had a high probability of realizing a given stop as an approximant at session 1 `r re_all$estimate_adj[8] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[8] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[8] %>% round(digits = 3)`].
+For participant 31, although the probability of an approximant realization was lower at session 6 `r re_all$estimate_adj[23] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[23] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[23] %>% round(digits = 3)`] than session 5, (`r re_all$estimate_adj[15] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[15] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[15] %>% round(digits = 3)`]), both of these probabilities were higher than session 1 (`r re_all$estimate_adj[7] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[7] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[7] %>% round(digits = 3)`]).
+Table 3 lists all probabilities of approximant realizations by each participant at each timepoint, with the upper and lower bounds of the Highest Density Intervel. 
+
+```{r}
+re_all %>% 
+  ggplot(aes(y = estimate_adj, x = session, color = as.factor(participant), group = participant)) + 
+  geom_line(position = position_dodge(width = .5)) +
+  geom_pointrange(aes(ymin = estimate_adj_lower, ymax = estimate_adj_upper),
+                  position = position_dodge(width = .5), size = .2) +
+  theme(panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(
+          size = 0.1, 
+          linetype = 'solid',
+          colour = "grey")) +
+  ylab("Probability") + xlab("Test Time") + scale_color_discrete(name = "Participant ID") + labs(caption = "Figure 8: The individual probability of an approximant realization at each time point")
+```
+
+**Table 3: All probabilities of approximant realizations by each participant at each session.**
+```{r}
+re_all %>%
+  dplyr::select(participant, session, estimate_adj, estimate_adj_lower, estimate_adj_upper) %>% 
+  rename(Probability = estimate_adj) %>%
+  rename(Lower = estimate_adj_lower) %>%
+  rename(Upper = estimate_adj_upper) %>%
+  knitr::kable(format = "pandoc", digits = 3)
+```  
+
+
+### Appendix/extras 
+
+Here I've included the plots of the three groups removed from the main analysis, Comparison-High", "Control-High-Partial", and "Experimental-High". 
+From these visualizations, it can be seen that the groups are overall producing approximants at a high rate in the beginning (session 1), which seems like good rationale for their removal. 
+
+```{r, echo=FALSE, message=FALSE, results='hide'}
+
+session_all %>% 
+  filter(group == "Comparison-High" | group == "Control-High-Partial" | group == "Experimental-High") %>% 
+  ggplot(aes(x = spectral, y = duration, color = category)) + 
+  geom_point(alpha = .5) +
+  facet_grid(group~session) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Spectral Pattern") + ylab("Duration (ms)") +
+  scale_x_discrete(labels=c("Continuous" = "C", "Stripe/Burst" = "S",
+                            "Whitening" = "W")) +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) +
+  labs(caption = "Figure 9: Extra groups Graph of duration and spectral data by group and session number. Spectral patterns were
+         labeled as continuous (C), whitened (W), or stripe/burst (S). Blue dots signify productions categorized
+         as “approximant”, yellow as “tap”, and red as “stop”.")
+
+```
+
+```{r}
+session_all %>% 
+    filter(group == "Comparison-High" | group == "Control-High-Partial" | group == "Experimental-High") %>% 
+  group_by(session, group, category) %>% 
+  summarize(n = n()) %>% 
+  ggplot(aes(y = n, x = category, fill = category)) + geom_col(color = "black") + 
+  scale_x_discrete(limits=c("tap", "stop", "approximant")) +
+  theme(panel.background = element_rect(fill = "white")) +
+  facet_grid(group~session) +
+  theme(text=
+          element_text(
+            size=10,
+            family="Times New Roman")) +
+  theme(legend.text=element_text(size=8)) +
+  theme(legend.position = "bottom") +
+  theme(legend.title = element_blank()) +
+  xlab("Type of /d/ realization") +
+  labs(caption = "Figure 10: Extra groups - The number of realizations of each category by each group during each session")
+```
+
+Finally, the session 2 analyses are reported here. 
+Figure 11 shows the total percentage of approximant realizations by 4 groups at session 2. 
+Table 4 gives this information in text.
+
+```{r}
+
+## Session 2 
+type2 = session_2 %>% 
+  group_by(category, group) %>% 
+  summarize(n = n()) 
+
+type_ov = session_2 %>% 
+  group_by(group) %>% 
+  summarize(total = n()) 
+
+type_merge = left_join(type2, type_ov) %>% 
+  mutate(percent = n/total)
+type_merge %>% 
+  ggplot(aes(y = percent, x = category, fill = category)) + geom_col(color = "black") + 
+  scale_x_discrete(limits=c("tap", "stop", "approximant")) +
+  theme(panel.background = element_rect(fill = "white")) +
+  facet_grid(~group) +
+  theme(text=
+          element_text(
+            size=10,
+            family="Times New Roman")) +
+  theme(legend.text=element_text(size=8)) +
+  theme(legend.position = "bottom") +
+  theme(legend.title = element_blank()) +
+  xlab("Type of /d/ realization") +
+  labs(caption = "Figure 11: Session 2 - The number of realizations of each category by each group")
+```
+
+**Table 4: Amount and percentage of each realization type during session 2**
+```{r}
+## Session 2 
+type2 = session_2 %>% 
+  group_by(category, group) %>% 
+  summarize(n = n()) 
+
+type_ov = session_2 %>% 
+  group_by(group) %>% 
+  summarize(total = n()) 
+
+type_merge = left_join(type2, type_ov) %>% 
+  mutate(percent = n/total) %>%
+  knitr::kable(format = "pandoc", digits = 3)
+
+```
+
+## Conclusion and takeaways
+
+Overall, it seems that there is evidence that the experimental group, but not the control or comparison groups, increased in the probability of realizing a given stop as an approximant as a function of session. 
+Additionally, this group maintained their improvement from session 5 to session 6, although this difference was not as big as the initial change from session 1 to session 5. 
+Individual analyses corroborate the trends seen at the group level, with 7 out of 8 members of the experimental group being more likely to produce an approximant after session 1. 
+However, one must be cautious in the interpretation of these results due to the lower sample observed here. 
+The HDIs of the parameter estimates suggest that there are rather wide amounts of uncertainty around the probability estimates.
+As a result, I recommend tempering strong narrative conclusions on the basis of this data.
+

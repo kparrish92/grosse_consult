@@ -26,7 +26,7 @@ Figure 1 shows the amount of each type of realization of the intervocalic /d/ by
 knitr::include_graphics(here("report", "figs", "desc_fig.png"))
 ```
 
-Figure 2 is a summary and visualization of the multinational model. The y-axis contains the names of each parameter estimate of the model and includes all fixed effects and interactions no used as the reference level. The reference level for the outcome variable was taps, where the reference for session and group were both "1". The density plots represent the posterior distribution of 95% all plausible values of the effect of the given parameter in log odds relative to the reference level. The numerical values represent the 95% Highest Density Interval (HDI), where the first number is the median value of the posterior and the numbers in brackets represent the upper and lower bounds of probable estimates.
+Figure 2 is a summary and visualization of the multinomial model. The y-axis contains the names of each parameter estimate of the model and includes all fixed effects and interactions no used as the reference level. The reference level for the outcome variable was taps, where the reference for session and group were both "1". The density plots represent the posterior distribution of 95% all plausible values of the effect of the given parameter in log odds relative to the reference level. The numerical values represent the 95% Highest Density Interval (HDI), where the first number is the median value of the posterior and the numbers in brackets represent the upper and lower bounds of probable estimates.
 
 **Figure 2**
 
@@ -48,8 +48,6 @@ read.csv(here("report", "param.csv")) %>%
   knitr::kable(format = "pandoc")
 
 ```
-
-
 
 ## Individual Analyses 
 
