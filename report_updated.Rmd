@@ -32,7 +32,7 @@ session_all$spectral <- factor(session_all$spectral,
 session_all %>% 
   filter(group == "Comparison" | group == "Experimental" | group == "Control") %>% 
   ggplot(aes(x = spectral, y = duration, color = category)) + 
-  geom_point(alpha = .5) +
+  geom_jitter(alpha = .5, width = .2) +
   facet_grid(group~session) + 
   theme_minimal() +
   scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
@@ -42,7 +42,7 @@ session_all %>%
   theme(
     strip.background = element_rect(
       color="black", fill="white", size=1.5, linetype="solid"
-    )) +
+    )) + 
   labs(caption = "Figure 1: Graph of duration and spectral data by group and session number. Spectral patterns were
          labeled as continuous (C), whitened (W), or stripe/burst (S). Blue dots signify productions categorized
          as “approximant”, yellow as “tap”, and red as “stop”.")
@@ -162,7 +162,7 @@ The same information can be seen for the comparison group in Figure 6 and the ex
 session_all %>% 
   filter(group == "Control") %>% 
   ggplot(aes(x = spectral, y = duration, color = category)) + 
-  geom_point(alpha = .5) +
+  geom_jitter(alpha = .5, width = .2) +
   facet_grid(partic~session) + 
   theme_minimal() +
   scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
@@ -183,7 +183,7 @@ session_all %>%
 session_all %>% 
   filter(group == "Comparison") %>% 
   ggplot(aes(x = spectral, y = duration, color = category)) + 
-  geom_point(alpha = .5) +
+  geom_jitter(alpha = .5, width = .2) +
   facet_grid(partic~session) + 
   theme_minimal() +
   scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
@@ -204,7 +204,7 @@ session_all %>%
 session_all %>% 
   filter(group == "Experimental") %>% 
   ggplot(aes(x = spectral, y = duration, color = category)) + 
-  geom_point(alpha = .5) +
+  geom_jitter(alpha = .5, width = .2) +
   facet_grid(partic~session) + 
   theme_minimal() +
   scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
@@ -261,7 +261,7 @@ From these visualizations, it can be seen that the groups are overall producing 
 session_all %>% 
   filter(group == "Comparison-High" | group == "Control-High-Partial" | group == "Experimental-High") %>% 
   ggplot(aes(x = spectral, y = duration, color = category)) + 
-  geom_point(alpha = .5) +
+  geom_jitter(alpha = .5, width = .2) +
   facet_grid(group~session) + 
   theme_minimal() +
   scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +

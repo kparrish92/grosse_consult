@@ -168,7 +168,7 @@ params$lo_5 = lower$`5`
 params$lo_6 = lower$`6`
 
 param_table = params %>% 
-  mutate(`Session 1` = paste0(round(`1`, digits = 3), 
+  mutate(`Session 1` = pa ste0(round(`1`, digits = 3), 
                               " [", round(params$lo_1, digits = 3),"-", 
                               round(params$hi_1, digits = 3), "]"),
          `Session 5` = paste0(round(`5`, digits = 3), 
