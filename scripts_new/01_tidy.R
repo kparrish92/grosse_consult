@@ -3,16 +3,19 @@ source(here::here("scripts_new", "00_libs.R"))
 
 df_session_2 = read.csv(here("data", "new_data.csv")) %>% 
   janitor::clean_names() %>% 
-  select(partic:category) %>% 
+  dplyr::select(partic:category) %>% 
   filter(session == 2) %>% 
   mutate("session_token" = paste0(session, "_", token)) 
 
 df_session_all = read.csv(here("data", "new_data.csv")) %>% 
   janitor::clean_names() %>% 
-  select(partic:category) %>% 
+  dplyr::select(partic:category) %>% 
   filter(!session == 2) %>% 
-  mutate("session_token" = paste0(session, "_", token)) 
+  mutate("session_token" = paste0(session, "_", token)) %>% 
+  mutate(group=ifelse(partic==48,gsub("Experimental","Experimental-High",group),group))
 
+d = session_all %>% 
+  filter(partic == 48)
 
 
 df_session_2 %>% 

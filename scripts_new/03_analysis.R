@@ -15,24 +15,25 @@ mod <-
       family = bernoulli(link = "logit"),
       cores = parallel::detectCores(), 
       data = sub,
-      file = here("data", "models", "mod_log_b.rds"))
+      file = here("data", "models", "mod_log_b_up.rds"))
 
 
 # Get experimental group participants 
 experimental_group = session_all %>% 
   filter(group == "Experimental") %>% 
-  select(partic) %>% 
+  dplyr::select(partic) %>% 
   unique()
 
 
-ran =  ranef(mod)[["partic"]] %>% 
+ran = ranef(mod)[["partic"]] %>% 
   as.data.frame() %>% 
   rownames_to_column("participant") %>% 
   filter(participant %in% experimental_group$partic) %>% 
-  select(-Est.Error.Intercept, -Est.Error.session5, -Est.Error.session6) %>% 
+  dplyr::select(-Est.Error.Intercept, -Est.Error.session5, -Est.Error.session6) %>% 
   pivot_longer(cols = c(2:10), names_to = "var", values_to = "estimate")
 
-fixef = ex[["session:group"]] %>% 
+
+fixef = conditional_effects(mod)[["session:group"]] %>% 
   filter(group == "Experimental") %>% 
   mutate(log_est = logit(estimate__))
 
@@ -40,8 +41,8 @@ ran_1 = ranef(mod)[["partic"]] %>%
   as.data.frame() %>% 
   rownames_to_column("participant") %>% 
   filter(participant %in% experimental_group$partic) %>% 
-  select(-Est.Error.Intercept, -Est.Error.session5, -Est.Error.session6) %>% 
-  select(participant, Estimate.Intercept, Q2.5.Intercept, Q97.5.Intercept) %>% 
+  dplyr::select(-Est.Error.Intercept, -Est.Error.session5, -Est.Error.session6) %>% 
+  dplyr::select(participant, Estimate.Intercept, Q2.5.Intercept, Q97.5.Intercept) %>% 
   mutate(session = "Session 1") %>% 
   mutate(fix_ef = fixef$log_est[1]) 
 
@@ -57,8 +58,8 @@ ran_5 = ranef(mod)[["partic"]] %>%
   as.data.frame() %>% 
   rownames_to_column("participant") %>% 
   filter(participant %in% experimental_group$partic) %>% 
-  select(-Est.Error.Intercept, -Est.Error.session5, -Est.Error.session6) %>% 
-  select(participant, Estimate.session5, Q2.5.session5, Q97.5.session5) %>% 
+  dplyr::select(-Est.Error.Intercept, -Est.Error.session5, -Est.Error.session6) %>% 
+  dplyr::select(participant, Estimate.session5, Q2.5.session5, Q97.5.session5) %>% 
   mutate(session = "Session 5") %>% 
   mutate(fix_ef = fixef$log_est[2])
 
@@ -74,8 +75,8 @@ ran_6 = ranef(mod)[["partic"]] %>%
   as.data.frame() %>% 
   rownames_to_column("participant") %>% 
   filter(participant %in% experimental_group$partic) %>% 
-  select(-Est.Error.Intercept, -Est.Error.session5, -Est.Error.session6) %>% 
-  select(participant, Estimate.session6, Q2.5.session6, Q97.5.session6) %>% 
+  dplyr::select(-Est.Error.Intercept, -Est.Error.session5, -Est.Error.session6) %>% 
+  dplyr::select(participant, Estimate.session6, Q2.5.session6, Q97.5.session6) %>% 
   mutate(session = "Session 6") %>% 
   mutate(fix_ef = fixef$log_est[3])
 

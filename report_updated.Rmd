@@ -73,7 +73,7 @@ session_all %>%
 ```
 
 Table 1 shows the output of the Bayesian logistic regression model.
-Overall, the model's conditional r squared value suggests that the model explained 37.6 of the variance observed in the data. 
+Overall, the model's conditional r squared value suggests that the model explained `r round(r2_bayes(mod)[["R2_Bayes"]], digits = 2)` percent of the variance observed in the data. 
 Figure 3 visualizes the model in a forest plot. 
 Each density plot is a summary of the most probable parameter estimates from the Bayesian model, and the values on the right side of the plot are the 95% highest density interval in log-odds. 
 
@@ -109,11 +109,11 @@ bayesplot::mcmc_areas(posterior,
 The output of logistic regressions models can be interpreted by adjusting the parameter estimates to a baseline group represented by the intercept of the model. 
 In this case, the intercept of the model tells us the log-odds of an approximant realization by the comparison group at session 1. 
 To figure out how the other groups perform, we simply add appropriate parameter estimates of the model to the intercept as it is appropriate. 
-For example, by adding session 5 (.65) to our intercept (-3.47), we get adjust for session while maintaining group (comparison). 
-As a result, our estimate is a log odds of -2.82 of producing a token as an approximant at session 5 for the comparison group. 
+For example, by adding session 5 (.47) to our intercept (-3.19), we get adjust for session while maintaining group (comparison). 
+As a result, our estimate is a log odds of -2.72 of producing a token as an approximant at session 5 for the comparison group. 
 
 ```{r}
-mod_b_new = readRDS(here("data", "models", "mod_log_b.rds"))
+mod_b_new = readRDS(here("data", "models", "mod_log_b_up.rds"))
 
 eff_df = conditional_effects(mod_b_new)[["session:group"]]
 
@@ -221,10 +221,9 @@ session_all %>%
 ```
 
 Figure 8 utilizes the random slope for session by participant from the Bayesian model to determine the probability of an approximant realization at each session by the experimental group.
-The figure shows that an approximant realization was more probable at session 5 than session 1 and at session 6 than session 5 for all participants except for participant 1 and participant 31 and participant 48.
-Participant 48 had a high probability of realizing a given stop as an approximant at session 1 `r re_all$estimate_adj[8] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[8] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[8] %>% round(digits = 3)`].
-For participant 31, although the probability of an approximant realization was lower at session 6 `r re_all$estimate_adj[23] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[23] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[23] %>% round(digits = 3)`] than session 5, (`r re_all$estimate_adj[15] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[15] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[15] %>% round(digits = 3)`]), both of these probabilities were higher than session 1 (`r re_all$estimate_adj[7] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[7] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[7] %>% round(digits = 3)`]).
-Table 3 lists all probabilities of approximant realizations by each participant at each timepoint, with the upper and lower bounds of the Highest Density Intervel. 
+The figure shows that an approximant realization was more probable at session 5 than session 1 and at session 6 than session 5 for all participants except for participant 1 and participant 31.
+For participant 31, although the probability of an approximant realization was lower at session 6 `r re_all$estimate_adj[21] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[21] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[21] %>% round(digits = 3)`] than session 5, (`r re_all$estimate_adj[14] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[14] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[14] %>% round(digits = 3)`]), both of these probabilities were higher than session 1 (`r re_all$estimate_adj[7] %>% round(digits = 3)` [95% HDI `r re_all$estimate_adj_lower[7] %>% round(digits = 3)` - `r re_all$estimate_adj_upper[7] %>% round(digits = 3)`]).
+Table 3 lists all probabilities of approximant realizations by each participant at each timepoint, with the upper and lower bounds of the Highest Density Interval. 
 
 ```{r}
 re_all %>% 
@@ -342,7 +341,7 @@ type_ov = session_2 %>%
   group_by(group) %>% 
   summarize(total = n()) 
 
-type_merge = left_join(type2, type_ov) %>% 
+left_join(type2, type_ov) %>% 
   mutate(percent = n/total) %>%
   knitr::kable(format = "pandoc", digits = 3)
 
