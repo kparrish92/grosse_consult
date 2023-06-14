@@ -1,6 +1,8 @@
 source(here::here("scripts_new", "00_libs.R"))
 source(here::here("scripts_new", "02_load_data.R"))
 
+
+
 session_all$session = as.factor(session_all$session)
 
 session_all$category <- as.factor(session_all$category)
@@ -15,7 +17,7 @@ mod <-
       family = bernoulli(link = "logit"),
       cores = parallel::detectCores(), 
       data = sub,
-      file = here("data", "models", "mod_log_b_up.rds"))
+      file = here("data", "models", "mod_log_b_up_two.rds"))
 
 
 # Get experimental group participants 
