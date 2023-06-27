@@ -53,11 +53,23 @@ The figure shows that the number of approximant realizations are relatively low 
 
 
 ```{r, fig.width = 7.5, fig.height=10}
-session_all %>% 
+
+type2_fig1 = session_all %>% 
   filter(group == "Comparison" | group == "Experimental" | group == "Control") %>% 
   group_by(session, group, category) %>% 
-  summarize(n = n()) %>% 
-  ggplot(aes(y = n, x = category, fill = category)) + geom_col(color = "black") + 
+  summarize(n = n())
+
+type_ov_fig1 = session_all %>% 
+  filter(group == "Comparison" | group == "Experimental" | group == "Control") %>% 
+  group_by(session, group) %>% 
+  summarize(total = n())
+
+
+type_merge_fig1 = left_join(type2_fig1, type_ov_fig1, by = c("group", "session")) %>% 
+  mutate(percent = n/total)
+
+type_merge_fig1 %>% 
+  ggplot(aes(y = percent, x = category, fill = category)) + geom_col(color = "black") + 
   scale_x_discrete(limits=c("tap", "stop", "approximant")) +
   theme(panel.background = element_rect(fill = "white")) +
   facet_grid(group~session) +
@@ -70,6 +82,7 @@ session_all %>%
   theme(legend.title = element_blank()) +
   scale_fill_manual(values=c("#56B4E9", "red", "#E69F00")) +
   xlab("Type of /d/ realization") +
+  scale_x_discrete(limits = c("approximant", "stop", "tap")) +
   labs(caption = "Figure 2: The number of realizations of each category by each group during each session")
 ```
 
@@ -110,7 +123,7 @@ bayesplot::mcmc_areas(posterior,
 The output of logistic regressions models can be interpreted by adjusting the parameter estimates to a baseline group represented by the intercept of the model. 
 In this case, the intercept of the model tells us the log-odds of an approximant realization by the comparison group at session 1. 
 To figure out how the other groups perform, we simply add appropriate parameter estimates of the model to the intercept as it is appropriate. 
-For example, by adding session 5 (.47) to our intercept (-3.19), we get adjust for session while maintaining group (comparison). 
+For example, by adding session 5 (.47) to our intercept (-3.19), we adjust for session while maintaining group (comparison). 
 As a result, our estimate is a log odds of -2.72 of producing a token as an approximant at session 5 for the comparison group. 
 
 ```{r, fig.width = 7.5, fig.height=10}
@@ -137,7 +150,7 @@ eff_df %>%
           linetype = 'solid',
           colour = "grey")) +
   ylab("Probability") + xlab("Test Time") +
-  scale_fill_manual(values=c("#5915bf", "#594e4c", "#62b57e")) +
+  scale_fill_manual(values=c("#f3ff03", "#595959", "#04d64b")) +
   labs(caption = "Figure 4: The probability of an approximant realization at each time point")
 ```
 
@@ -235,6 +248,7 @@ Table 3 lists all probabilities of approximant realizations by each participant 
 
 ```{r, fig.width = 7.5, fig.height=10}
 re_all %>% 
+#  filter(group == "Experimental Group") %>% 
   ggplot(aes(y = estimate_adj, x = session, color = as.factor(participant), group = participant)) + 
   geom_line(position = position_dodge(width = .5)) +
   geom_pointrange(aes(ymin = estimate_adj_lower, ymax = estimate_adj_upper),
@@ -244,9 +258,42 @@ re_all %>%
           size = 0.1, 
           linetype = 'solid',
           colour = "grey")) +
-  ylab("Probability") + xlab("Test Time") + scale_color_discrete(name = "Participant ID") + labs(caption = "Figure 8: The individual probability of an approximant realization at each time point")
+  ylim(0, 1) +
+  ylab("Probability") + xlab("Test Time") + scale_color_discrete(name = "Participant ID") + labs(caption = "Figure 8a: The individual probability of the experimental group of an approximant realization at each time point")
 ```
 
+```{r}
+re_all_con %>% 
+#  filter(group == "Experimental Group") %>% 
+  ggplot(aes(y = estimate_adj, x = session, color = as.factor(participant), group = participant)) + 
+  geom_line(position = position_dodge(width = .5)) +
+  geom_pointrange(aes(ymin = estimate_adj_lower, ymax = estimate_adj_upper),
+                  position = position_dodge(width = .5), size = .2) +
+  theme(panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(
+          size = 0.1, 
+          linetype = 'solid',
+          colour = "grey")) +
+  ylim(0, 1) +
+  ylab("Probability") + xlab("Test Time") + scale_color_discrete(name = "Participant ID") + labs(caption = "Figure 8b: The individual probability of the control group of an approximant realization at each time point")
+
+```
+
+```{r}
+re_all_comp %>% 
+#  filter(group == "Experimental Group") %>% 
+  ggplot(aes(y = estimate_adj, x = session, color = as.factor(participant), group = participant)) + 
+  geom_line(position = position_dodge(width = .5)) +
+  geom_pointrange(aes(ymin = estimate_adj_lower, ymax = estimate_adj_upper),
+                  position = position_dodge(width = .5), size = .2) +
+  theme(panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(
+          size = 0.1, 
+          linetype = 'solid',
+          colour = "grey")) +
+  ylim(0, 1) +
+  ylab("Probability") + xlab("Test Time") + scale_color_discrete(name = "Participant ID") + labs(caption = "Figure 8c: The individual probability of the comparison group of an approximant realization at each time point")
+```
 **Table 3: All probabilities of approximant realizations by each participant at each session.**
 ```{r}
 re_all %>%
@@ -288,11 +335,23 @@ session_all %>%
 ```
 
 ```{r, fig.width = 7.5, fig.height=10}
-session_all %>% 
-    filter(group == "Comparison-High" | group == "Control-High-Partial" | group == "Experimental-High") %>% 
+
+type2_fig10 = session_all %>% 
+  filter(group == "Comparison-High" | group == "Control-High-Partial" | group == "Experimental-High") %>% 
   group_by(session, group, category) %>% 
-  summarize(n = n()) %>% 
-  ggplot(aes(y = n, x = category, fill = category)) + geom_col(color = "black") + 
+  summarize(n = n())
+
+type_ov_fig10 = session_all %>% 
+  filter(group == "Comparison-High" | group == "Control-High-Partial" | group == "Experimental-High") %>% 
+  group_by(session, group) %>% 
+  summarize(total = n())
+
+
+type_merge_fig10 = left_join(type2_fig10, type_ov_fig10, by = c("group", "session")) %>% 
+  mutate(percent = n/total)
+
+type_merge_fig10 %>% 
+  ggplot(aes(y = percent, x = category, fill = category)) + geom_col(color = "black") + 
   scale_x_discrete(limits=c("tap", "stop", "approximant")) +
   theme(panel.background = element_rect(fill = "white")) +
   facet_grid(group~session) +
@@ -305,6 +364,7 @@ session_all %>%
   theme(legend.position = "bottom") +
   theme(legend.title = element_blank()) +
   xlab("Type of /d/ realization") +
+  scale_x_discrete(limits = c("approximant", "stop", "tap")) +
   labs(caption = "Figure 10: Extra groups - The number of realizations of each category by each group during each session")
 ```
 
@@ -325,7 +385,9 @@ type_ov = session_2 %>%
 
 type_merge = left_join(type2, type_ov) %>% 
   mutate(percent = n/total)
+
 type_merge %>% 
+  filter(group == "Comparison" | group == "Experimental") %>% 
   ggplot(aes(y = percent, x = category, fill = category)) + geom_col(color = "black") + 
   scale_x_discrete(limits=c("tap", "stop", "approximant")) +
   theme(panel.background = element_rect(fill = "white")) +
@@ -339,11 +401,12 @@ type_merge %>%
   theme(legend.title = element_blank()) +
   xlab("Type of /d/ realization") +
   scale_fill_manual(values=c("#56B4E9", "red", "#E69F00")) +
-  labs(caption = "Figure 11: Session 2 - The number of realizations of each category by each group")
+  scale_x_discrete(limits = c("approximant", "stop", "tap")) +
+  labs(caption = "Figure 11a: Session 2 - The number of realizations of each category by the experimental and comparison groups")
 ```
 
-**Table 4: Amount and percentage of each realization type during session 2**
-```{r}
+```{r, fig.width = 7.5, fig.height=10}
+
 ## Session 2 
 type2 = session_2 %>% 
   group_by(category, group) %>% 
@@ -353,10 +416,51 @@ type_ov = session_2 %>%
   group_by(group) %>% 
   summarize(total = n()) 
 
-left_join(type2, type_ov) %>% 
-  mutate(percent = n/total) %>%
-  knitr::kable(format = "pandoc", digits = 3)
+type_merge = left_join(type2, type_ov) %>% 
+  mutate(percent = n/total)
 
+type_merge %>% 
+  filter(group == "Comparison-High" | group == "Experimental-High") %>% 
+  ggplot(aes(y = percent, x = category, fill = category)) + geom_col(color = "black") + 
+  scale_x_discrete(limits=c("tap", "stop", "approximant")) +
+  theme(panel.background = element_rect(fill = "white")) +
+  facet_grid(~group) +
+  theme(text=
+          element_text(
+            size=10,
+            family="Times New Roman")) +
+  theme(legend.text=element_text(size=8)) +
+  theme(legend.position = "bottom") +
+  theme(legend.title = element_blank()) +
+  xlab("Type of /d/ realization") +
+  scale_fill_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  scale_x_discrete(limits = c("approximant", "stop", "tap")) +
+  labs(caption = "Figure 11b: Session 2 - The number of realizations of each category by the experimental-high and comparison-high groups")
+```
+
+**Table 4: Amount and percentage of each realization type during all sessions**
+```{r}
+## Session 2 
+type2 = session_all %>% 
+  group_by(category, group, session) %>% 
+  summarize(n = n(),
+            mean_ri = round(mean(ri), digits = 2),
+            sd_ri = round(sd(ri), digits = 2),
+            mean_wmrv = round(mean(wmrv), digits = 2),
+            sd_wmrv = round(sd(wmrv), digits = 2),
+            mean_duration = round(mean(duration), digits = 2),
+            sd_duration = round(sd(duration), digits = 2))
+
+type_ov = session_all %>% 
+  group_by(group, session) %>% 
+  summarize(total = n()) 
+
+pct_df = left_join(type2, type_ov) %>% 
+  mutate(percent = round(n/total, digits = 2))
+
+pct_df %>%
+  arrange(session, group) %>% 
+  knitr::kable(format = "pandoc")
 ```
 
 ## Conclusion and takeaways

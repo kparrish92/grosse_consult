@@ -13,4 +13,8 @@ session_all = read.csv(here("data", "all_sessions.csv")) %>%
 
 re_all = read.csv(here("data", "ran_eff.csv"))
 
+re_all_con = read.csv(here("data", "ran_eff_control.csv"))
+
+re_all_comp = read.csv(here("data", "ran_eff_comparison.csv"))
+
 mod = read_rds(here("data", "models", "mod_log_b_up.rds"))

@@ -10,7 +10,6 @@ df_session_2 = read.csv(here("data", "new_data.csv")) %>%
 df_session_all = read.csv(here("data", "new_data.csv")) %>% 
   janitor::clean_names() %>% 
   dplyr::select(partic:category) %>% 
-  filter(!session == 2) %>% 
   mutate("session_token" = paste0(session, "_", token)) %>% 
   mutate(group=ifelse(partic==48,gsub("Experimental","Experimental-High",group),group))
 
