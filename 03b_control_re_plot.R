@@ -1,10 +1,11 @@
+source(here::here("scripts_new", "00_libs.R"))
+source(here::here("scripts_new", "02_load_data.R"))
 
 # Get experimental group participants 
 experimental_group = session_all %>% 
   filter(group == "Control") %>% 
   dplyr::select(partic) %>% 
   unique()
-
 
 ran = ranef(mod)[["partic"]] %>% 
   as.data.frame() %>% 
@@ -32,8 +33,8 @@ names(ran_1)[3] <- "lower"
 names(ran_1)[4] <- "upper"
 
 ran_1$estimate_adj = plogis(ran_1$fix_ef + ran_1$est)
-ran_1$estimate_adj_upper = plogis(ran_1$fix_ef + ran_1$est + ran_1$upper)
-ran_1$estimate_adj_lower = plogis(ran_1$fix_ef + ran_1$est + ran_1$lower)
+ran_1$estimate_adj_upper = plogis(ran_1$fix_ef + ran_1$upper)
+ran_1$estimate_adj_lower = plogis(ran_1$fix_ef + ran_1$lower)
 
 ran_5 = ranef(mod)[["partic"]] %>% 
   as.data.frame() %>% 
@@ -49,8 +50,8 @@ names(ran_5)[3] <- "lower"
 names(ran_5)[4] <- "upper"
 
 ran_5$estimate_adj = plogis(ran_5$fix_ef + ran_5$est)
-ran_5$estimate_adj_upper = plogis(ran_5$fix_ef + ran_5$est + ran_5$upper)
-ran_5$estimate_adj_lower = plogis(ran_5$fix_ef + ran_5$est + ran_5$lower)
+ran_5$estimate_adj_upper = plogis(ran_5$fix_ef + ran_5$upper)
+ran_5$estimate_adj_lower = plogis(ran_5$fix_ef + ran_5$lower)
 
 ran_6 = ranef(mod)[["partic"]] %>% 
   as.data.frame() %>% 
@@ -67,13 +68,26 @@ names(ran_6)[3] <- "lower"
 names(ran_6)[4] <- "upper"
 
 ran_6$estimate_adj = plogis(ran_6$fix_ef + ran_6$est)
-ran_6$estimate_adj_upper = plogis(ran_6$fix_ef + ran_6$est + ran_6$upper)
-ran_6$estimate_adj_lower = plogis(ran_6$fix_ef + ran_6$est + ran_6$lower)
+ran_6$estimate_adj_upper = plogis(ran_6$fix_ef + ran_6$upper)
+ran_6$estimate_adj_lower = plogis(ran_6$fix_ef + ran_6$lower)
 
 re_all = rbind(ran_1, ran_5, ran_6)
 
 re_all %>% 
   ggplot(aes(x = estimate_adj, y = participant)) + geom_point() + facet_grid(~session)
+
+re_all %>% 
+  #  filter(group == "Experimental Group") %>% 
+  ggplot(aes(y = estimate_adj, x = session, color = as.factor(participant), group = participant)) + 
+  geom_line(position = position_dodge(width = .5)) +
+  geom_pointrange(aes(ymin = estimate_adj_lower, ymax = estimate_adj_upper),
+                  position = position_dodge(width = .5), size = .2) +
+  theme(panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(
+          size = 0.1, 
+          linetype = 'solid',
+          colour = "grey")) +
+  ylim(0, 1)
 
 re_all %>%
   write.csv(here("data", "ran_eff_control.csv"))

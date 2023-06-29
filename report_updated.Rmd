@@ -1,7 +1,7 @@
 ---
 title: "Updated data: Grosse"
 output: html_document
-date: '2023-06-27'
+date: '2023-06-29'
 ---
 
 ```{r setup, include=FALSE}
@@ -262,7 +262,7 @@ re_all %>%
   ylab("Probability") + xlab("Test Time") + scale_color_discrete(name = "Participant ID") + labs(caption = "Figure 8a: The individual probability of the experimental group of an approximant realization at each time point")
 ```
 
-```{r}
+```{r, fig.width = 7.5, fig.height=10}
 re_all_con %>% 
 #  filter(group == "Experimental Group") %>% 
   ggplot(aes(y = estimate_adj, x = session, color = as.factor(participant), group = participant)) + 
@@ -279,7 +279,7 @@ re_all_con %>%
 
 ```
 
-```{r}
+```{r, fig.width = 7.5, fig.height=10}
 re_all_comp %>% 
 #  filter(group == "Experimental Group") %>% 
   ggplot(aes(y = estimate_adj, x = session, color = as.factor(participant), group = participant)) + 
@@ -294,6 +294,7 @@ re_all_comp %>%
   ylim(0, 1) +
   ylab("Probability") + xlab("Test Time") + scale_color_discrete(name = "Participant ID") + labs(caption = "Figure 8c: The individual probability of the comparison group of an approximant realization at each time point")
 ```
+
 **Table 3: All probabilities of approximant realizations by each participant at each session.**
 ```{r}
 re_all %>%
