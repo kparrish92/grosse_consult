@@ -25,10 +25,6 @@ mod <-
       data = sub)
 
 
-glimpse(mtcars)
-mod <- 
-  brms::brm(formula = mpg ~ wt,
-            data = mtcars)
 
 
 
@@ -81,9 +77,9 @@ names(ran_5)[2] <- "est"
 names(ran_5)[3] <- "lower"
 names(ran_5)[4] <- "upper"
 
-ran_5$estimate_adj = plogis(ran_5$fix_ef + ran_5$est)
-ran_5$estimate_adj_upper = plogis(ran_5$fix_ef + ran_5$upper)
-ran_5$estimate_adj_lower = plogis(ran_5$fix_ef + ran_5$lower)
+ran_5$estimate_adj = plogis(ran_5$fix_ef + ran_5$est + ran_1$est)
+ran_5$estimate_adj_upper = plogis(ran_5$fix_ef + ran_5$upper + ran_1$upper)
+ran_5$estimate_adj_lower = plogis(ran_5$fix_ef + ran_5$lower + ran_1$lower)
 
 ran_6 = ranef(mod)[["partic"]] %>% 
   as.data.frame() %>% 
@@ -99,9 +95,10 @@ names(ran_6)[2] <- "est"
 names(ran_6)[3] <- "lower"
 names(ran_6)[4] <- "upper"
 
-ran_6$estimate_adj = plogis(ran_6$fix_ef + ran_6$est)
-ran_6$estimate_adj_upper = plogis(ran_6$fix_ef + ran_6$upper)
-ran_6$estimate_adj_lower = plogis(ran_6$fix_ef + ran_6$lower)
+ran_6$estimate_adj = plogis(ran_6$fix_ef + ran_6$est + ran_1$est)
+ran_6$estimate_adj_upper = plogis(ran_6$fix_ef + ran_6$upper + ran_1$upper)
+ran_6$estimate_adj_lower = plogis(ran_6$fix_ef + ran_6$lower + ran_1$lower)
+
 
 re_all = rbind(ran_1, ran_5, ran_6)
 
