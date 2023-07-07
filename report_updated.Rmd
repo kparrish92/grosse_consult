@@ -1,7 +1,7 @@
 ---
 title: "Updated data: Grosse"
 output: html_document
-date: '2023-06-29'
+date: '2023-07-07'
 ---
 
 ```{r setup, include=FALSE}
@@ -295,9 +295,29 @@ re_all_comp %>%
   ylab("Probability") + xlab("Test Time") + scale_color_discrete(name = "Participant ID") + labs(caption = "Figure 8c: The individual probability of the comparison group of an approximant realization at each time point")
 ```
 
-**Table 3: All probabilities of approximant realizations by each participant at each session.**
+**Table 3a: Experimental Group - All probabilities of approximant realizations by each participant at each session.**
 ```{r}
 re_all %>%
+  dplyr::select(participant, session, estimate_adj, estimate_adj_lower, estimate_adj_upper) %>% 
+  rename(Probability = estimate_adj) %>%
+  rename(Lower = estimate_adj_lower) %>%
+  rename(Upper = estimate_adj_upper) %>%
+  knitr::kable(format = "pandoc", digits = 3)
+```  
+
+**Table 3b: Experimental Group - All probabilities of approximant realizations by each participant at each session.**
+```{r}
+re_all_con %>%
+  dplyr::select(participant, session, estimate_adj, estimate_adj_lower, estimate_adj_upper) %>% 
+  rename(Probability = estimate_adj) %>%
+  rename(Lower = estimate_adj_lower) %>%
+  rename(Upper = estimate_adj_upper) %>%
+  knitr::kable(format = "pandoc", digits = 3)
+```  
+
+**Table 3c: Comparison Group - All probabilities of approximant realizations by each participant at each session.**
+```{r}
+re_all_comp %>%
   dplyr::select(participant, session, estimate_adj, estimate_adj_lower, estimate_adj_upper) %>% 
   rename(Probability = estimate_adj) %>%
   rename(Lower = estimate_adj_lower) %>%
