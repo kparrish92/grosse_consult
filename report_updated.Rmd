@@ -87,7 +87,7 @@ type_merge_fig1 %>%
 ```
 
 Table 1 shows the output of the Bayesian logistic regression model.
-Overall, the model's conditional r squared value suggests that the model explained `r round(r2_bayes(mod)[["R2_Bayes"]], digits = 2)` percent of the variance observed in the data. 
+Overall, the model's conditional r squared value suggests that the model explained `r round(r2_bayes(mod)[["R2_Bayes"]], digits = 2)*100` percent of the variance observed in the data. 
 Figure 3 visualizes the model in a forest plot. 
 Each density plot is a summary of the most probable parameter estimates from the Bayesian model, and the values on the right side of the plot are the 95% highest density interval in log-odds. 
 
@@ -305,7 +305,7 @@ re_all %>%
   knitr::kable(format = "pandoc", digits = 3)
 ```  
 
-**Table 3b: Experimental Group - All probabilities of approximant realizations by each participant at each session.**
+**Table 3b: Control Group - All probabilities of approximant realizations by each participant at each session.**
 ```{r}
 re_all_con %>%
   dplyr::select(participant, session, estimate_adj, estimate_adj_lower, estimate_adj_upper) %>% 
