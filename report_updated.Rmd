@@ -1,7 +1,7 @@
 ---
 title: "Updated data: Grosse"
 output: html_document
-date: '2023-07-07'
+date: '2023-07-12'
 ---
 
 ```{r setup, include=FALSE}
@@ -47,6 +47,8 @@ session_all %>%
          labeled as continuous (C), whitened (W), or stripe/burst (S). Blue dots signify productions categorized
          as “approximant”, yellow as “tap”, and red as “stop”.")
 ```
+
+
 
 Figure 2 shows just the number of each type of realization per group per session.
 The figure shows that the number of approximant realizations are relatively low by all groups in session 1, while the quantity of approximant realizations was larger in both sessions 5 and 6 for the experimental groups, but not for the comparison and control groups. 
@@ -493,3 +495,136 @@ However, one must be cautious in the interpretation of these results due to the 
 The HDIs of the parameter estimates suggest that there are rather wide amounts of uncertainty around the probability estimates.
 As a result, I recommend tempering strong narrative conclusions on the basis of this data.
 
+## Extra plots 
+
+### Duration as a function of RI per group with color 
+
+```{r, fig.width = 7.5, fig.height=10, echo=FALSE, message=FALSE, results='hide'}
+session_all$spectral <- factor(session_all$spectral, 
+                               levels=c("Continuous", 
+                                        "Whitening", 
+                                        "Stripe/Burst"))
+
+session_all %>% 
+  filter(group == "Comparison") %>% 
+  ggplot(aes(x = duration, y = ri, color = category)) + 
+  geom_jitter(alpha = .5, width = .2) +
+  facet_wrap(~session, ncol = 1) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Duration (ms)") + ylab("Relative Intensity") +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) + 
+  labs(caption = "Figure 12a: Duration as a function of relative intensity in the comparison group")
+```
+
+```{r, fig.width = 7.5, fig.height=10, echo=FALSE, message=FALSE, results='hide'}
+session_all$spectral <- factor(session_all$spectral, 
+                               levels=c("Continuous", 
+                                        "Whitening", 
+                                        "Stripe/Burst"))
+
+session_all %>% 
+  filter(group == "Control") %>% 
+  ggplot(aes(x = duration, y = ri, color = category)) + 
+  geom_jitter(alpha = .5, width = .2) +
+  facet_wrap(~session, ncol = 1) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Duration (ms)") + ylab("Relative Intensity") +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) + 
+  labs(caption = "Figure 12b: Duration as a function of relative intensity in the control group")
+```
+
+
+```{r, fig.width = 7.5, fig.height=10, echo=FALSE, message=FALSE, results='hide'}
+session_all$spectral <- factor(session_all$spectral, 
+                               levels=c("Continuous", 
+                                        "Whitening", 
+                                        "Stripe/Burst"))
+
+session_all %>% 
+  filter(group == "Comparison") %>% 
+  ggplot(aes(x = duration, y = ri, color = category)) + 
+  geom_jitter(alpha = .5, width = .2) +
+  facet_wrap(~session, ncol = 1) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Duration (ms)") + ylab("Relative Intensity") +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) + 
+  labs(caption = "Figure 12c: Duration as a function of relative intensity in the experimental group")
+```
+
+### Duration as a function of RI per group (black and white)
+
+```{r, fig.width = 7.5, fig.height=10, echo=FALSE, message=FALSE, results='hide'}
+session_all$spectral <- factor(session_all$spectral, 
+                               levels=c("Continuous", 
+                                        "Whitening", 
+                                        "Stripe/Burst"))
+
+session_all %>% 
+  filter(group == "Comparison") %>% 
+  ggplot(aes(x = duration, y = ri)) + 
+  geom_jitter(alpha = .5, width = .2) +
+  facet_wrap(~session, ncol = 1) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Duration (ms)") + ylab("Relative Intensity") +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) + 
+  labs(caption = "Figure 12a: Duration as a function of relative intensity in the comparison group")
+```
+
+```{r, fig.width = 7.5, fig.height=10, echo=FALSE, message=FALSE, results='hide'}
+session_all$spectral <- factor(session_all$spectral, 
+                               levels=c("Continuous", 
+                                        "Whitening", 
+                                        "Stripe/Burst"))
+
+session_all %>% 
+  filter(group == "Control") %>% 
+  ggplot(aes(x = duration, y = ri)) + 
+  geom_jitter(alpha = .5, width = .2) +
+  facet_wrap(~session, ncol = 1) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Duration (ms)") + ylab("Relative Intensity") +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) + 
+  labs(caption = "Figure 12b: Duration as a function of relative intensity in the control group")
+```
+
+
+```{r, fig.width = 7.5, fig.height=10, echo=FALSE, message=FALSE, results='hide'}
+session_all$spectral <- factor(session_all$spectral, 
+                               levels=c("Continuous", 
+                                        "Whitening", 
+                                        "Stripe/Burst"))
+
+session_all %>% 
+  filter(group == "Comparison") %>% 
+  ggplot(aes(x = duration, y = ri)) + 
+  geom_jitter(alpha = .5, width = .2) +
+  facet_wrap(~session, ncol = 1) + 
+  theme_minimal() +
+  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
+  xlab("Duration (ms)") + ylab("Relative Intensity") +
+  theme(
+    strip.background = element_rect(
+      color="black", fill="white", size=1.5, linetype="solid"
+    )) + 
+  labs(caption = "Figure 12c: Duration as a function of relative intensity in the experimental group")
+```
