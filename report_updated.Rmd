@@ -507,7 +507,7 @@ session_all$spectral <- factor(session_all$spectral,
 
 session_all %>% 
   filter(group == "Comparison") %>% 
-  ggplot(aes(x = duration, y = ri, color = category)) + 
+  ggplot(aes(y = duration, x = ri, color = category)) + 
   geom_jitter(alpha = .5, width = .2) +
   facet_wrap(~session, ncol = 1) + 
   theme_minimal() +
@@ -528,7 +528,7 @@ session_all$spectral <- factor(session_all$spectral,
 
 session_all %>% 
   filter(group == "Control") %>% 
-  ggplot(aes(x = duration, y = ri, color = category)) + 
+  ggplot(aes(y = duration, x = ri, color = category)) + 
   geom_jitter(alpha = .5, width = .2) +
   facet_wrap(~session, ncol = 1) + 
   theme_minimal() +
@@ -549,8 +549,8 @@ session_all$spectral <- factor(session_all$spectral,
                                         "Stripe/Burst"))
 
 session_all %>% 
-  filter(group == "Comparison") %>% 
-  ggplot(aes(x = duration, y = ri, color = category)) + 
+  filter(group == "Experimental") %>% 
+  ggplot(aes(y = duration, x = ri, color = category)) + 
   geom_jitter(alpha = .5, width = .2) +
   facet_wrap(~session, ncol = 1) + 
   theme_minimal() +
@@ -573,7 +573,7 @@ session_all$spectral <- factor(session_all$spectral,
 
 session_all %>% 
   filter(group == "Comparison") %>% 
-  ggplot(aes(x = duration, y = ri)) + 
+  ggplot(aes(y = duration, x = ri)) + 
   geom_jitter(alpha = .5, width = .2) +
   facet_wrap(~session, ncol = 1) + 
   theme_minimal() +
@@ -594,7 +594,7 @@ session_all$spectral <- factor(session_all$spectral,
 
 session_all %>% 
   filter(group == "Control") %>% 
-  ggplot(aes(x = duration, y = ri)) + 
+  ggplot(aes(y = duration, x = ri)) + 
   geom_jitter(alpha = .5, width = .2) +
   facet_wrap(~session, ncol = 1) + 
   theme_minimal() +
@@ -615,8 +615,8 @@ session_all$spectral <- factor(session_all$spectral,
                                         "Stripe/Burst"))
 
 session_all %>% 
-  filter(group == "Comparison") %>% 
-  ggplot(aes(x = duration, y = ri)) + 
+  filter(group == "Experimental") %>% 
+  ggplot(aes(y = duration, x = ri)) + 
   geom_jitter(alpha = .5, width = .2) +
   facet_wrap(~session, ncol = 1) + 
   theme_minimal() +
