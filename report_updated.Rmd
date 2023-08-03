@@ -1,7 +1,7 @@
 ---
 title: "Updated data: Grosse"
 output: html_document
-date: '2023-07-17'
+date: '2023-08-02'
 ---
 
 ```{r setup, include=FALSE}
@@ -328,68 +328,6 @@ re_all_comp %>%
 ```  
 
 
-### Appendix/extras 
-
-Here I've included the plots of the three groups removed from the main analysis, Comparison-High", "Control-High-Partial", and "Experimental-High". 
-From these visualizations, it can be seen that the groups are overall producing approximants at a high rate in the beginning (session 1), which seems like good rationale for their removal. 
-
-```{r, fig.width = 7.5, fig.height=10, echo=FALSE, message=FALSE, results='hide'}
-
-session_all %>% 
-  filter(group == "Comparison-High" | group == "Control-High-Partial" | group == "Experimental-High") %>% 
-  ggplot(aes(x = spectral, y = duration, color = category)) + 
-  geom_jitter(alpha = .5, width = .2) +
-  facet_grid(group~session) + 
-  theme_minimal() +
-  scale_color_manual(values=c("#56B4E9", "red", "#E69F00")) +
-  xlab("Spectral Pattern") + ylab("Duration (ms)") +
-  scale_x_discrete(labels=c("Continuous" = "C", "Stripe/Burst" = "S",
-                            "Whitening" = "W")) +
-  theme(
-    strip.background = element_rect(
-      color="black", fill="white", size=1.5, linetype="solid"
-    )) +
-  labs(caption = "Figure 9: Extra groups Graph of duration and
-  spectral data by group and session number. Spectral patterns were
-  labeled as continuous (C), whitened (W), or stripe/burst (S). Blue
-  dots signify productions categorized as “approximant”, yellow as
-  “tap”, and red as “stop”.")
-
-```
-
-```{r, fig.width = 7.5, fig.height=10}
-
-type2_fig10 = session_all %>% 
-  filter(group == "Comparison-High" | group == "Control-High-Partial" | group == "Experimental-High") %>% 
-  group_by(session, group, category) %>% 
-  summarize(n = n())
-
-type_ov_fig10 = session_all %>% 
-  filter(group == "Comparison-High" | group == "Control-High-Partial" | group == "Experimental-High") %>% 
-  group_by(session, group) %>% 
-  summarize(total = n())
-
-
-type_merge_fig10 = left_join(type2_fig10, type_ov_fig10, by = c("group", "session")) %>% 
-  mutate(percent = n/total)
-
-type_merge_fig10 %>% 
-  ggplot(aes(y = percent, x = category, fill = category)) + geom_col(color = "black") + 
-  scale_x_discrete(limits=c("tap", "stop", "approximant")) +
-  theme(panel.background = element_rect(fill = "white")) +
-  facet_grid(group~session) +
-  theme(text=
-          element_text(
-            size=10,
-            family="Times New Roman")) +
-  scale_fill_manual(values=c("#56B4E9", "red", "#E69F00")) +
-  theme(legend.text=element_text(size=8)) +
-  theme(legend.position = "bottom") +
-  theme(legend.title = element_blank()) +
-  xlab("Type of /d/ realization") +
-  scale_x_discrete(limits = c("approximant", "stop", "tap")) +
-  labs(caption = "Figure 10: Extra groups - The number of realizations of each category by each group during each session")
-```
 
 Finally, the session 2 analyses are reported here. 
 Figure 11 shows the total percentage of approximant realizations by 4 groups at session 2. 

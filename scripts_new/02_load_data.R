@@ -1,5 +1,6 @@
 # load data 
 
+
 session_2 = read.csv(here("data", "session_2.csv"))
 
 session_all = read.csv(here("data", "all_sessions.csv")) %>% 
@@ -18,3 +19,8 @@ re_all_con = read.csv(here("data", "ran_eff_control.csv"))
 re_all_comp = read.csv(here("data", "ran_eff_comparison.csv"))
 
 mod = read_rds(here("data", "models", "mod_log_b_up_two.rds"))
+
+
+session_all = read.csv(here("data", "final_update_data.csv")) %>% 
+  janitor::clean_names() %>% 
+  mutate(duration = duration*1000)
